@@ -1,0 +1,138 @@
+Mon Mar 28 11:13:45 2022    ./v1/output.dat
+
+         326497016 function calls (325409130 primitive calls) in 39085.766 seconds
+
+   Ordered by: call count
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+ 33007216    4.688    0.000    4.688    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\coreviews.py:44(__init__)
+ 21586556    2.767    0.000    2.767    0.000 {method 'get' of 'dict' objects}
+ 20679282    3.629    0.000    3.629    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\coreviews.py:53(__getitem__)
+ 18135924   21.565    0.000   23.975    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\coreviews.py:81(__getitem__)
+ 14690714   11.927    0.000   18.310    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\_collections_abc.py:901(__iter__)
+14143718/13055971   11.950    0.000   12.463    0.000 {built-in method builtins.iter}
+ 13783540    9.055    0.000   37.343    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\graph.py:452(__getitem__)
+ 13783540    5.554    0.000    7.623    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:323(adj)
+ 13603759    2.635    0.000    6.164    0.000 {method 'update' of 'dict' objects}
+ 11247368    8.011    0.000    8.012    0.000 {built-in method builtins.min}
+ 11174173    1.742    0.000    1.742    0.000 {method 'add' of 'set' objects}
+ 10879575    2.706    0.000    6.792    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\coreviews.py:50(__iter__)
+  9251388   18.088    0.000   20.876    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:568(add_edge)
+  8343988   20.931    0.000   31.556    0.000 {built-in method builtins.next}
+7835397/7835260    1.195    0.000    1.195    0.000 {built-in method builtins.len}
+  7620617    0.815    0.000    0.848    0.000 {built-in method builtins.isinstance}
+  7620240    2.687    0.000    3.498    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:187(__getitem__)
+  6347596  651.085    0.000  651.085    0.000 {method 'append' of 'list' objects}
+  6167594    0.974    0.000    0.974    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\graph.py:416(__contains__)
+  6167586    2.602    0.000    3.512    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:726(<genexpr>)
+  6167586    1.314    0.000    1.314    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:124(<genexpr>)
+  6167584    1.280    0.000    1.280    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\graph.py:1173(has_edge)
+  6167584    0.747    0.000    0.747    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:712(<lambda>)
+  5439954    0.730    0.000    0.730    0.000 {method 'pop' of 'list' objects}
+  5439669    0.803    0.000    0.803    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\_collections_abc.py:854(__init__)
+  4351577    3.736    0.000    4.406    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\_collections_abc.py:832(items)
+  4171888    1.274    0.000    1.968    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\_collections_abc.py:920(__iter__)
+  3083800    0.659    0.000    0.659    0.000 {method 'split' of 'str' objects}
+  3083797    0.550    0.000    0.550    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:1012(__iter__)
+  2176445    0.269    0.000    0.269    0.000 {method 'remove' of 'set' objects}
+  2176190    0.162    0.000    0.162    0.000 {method 'items' of 'dict' objects}
+  2176184   10.978    0.000   10.978    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:50(__init__)
+  2175122    0.208    0.000    0.208    0.000 {method 'popleft' of 'collections.deque' objects}
+  2175119    0.218    0.000    0.218    0.000 {method 'append' of 'collections.deque' objects}
+  1088370    1.208    0.000    3.528    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:177(<genexpr>)
+  1088227    0.288    0.000    0.425    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\coreviews.py:47(__len__)
+  1088227    0.983    0.000   21.727    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:40(_rewind)
+  1088093    0.222    0.000    0.739    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\graph.py:1804(<genexpr>)
+  1088093    0.397    0.000    0.517    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:386(__iter__)
+  1088092    0.328    0.000    0.463    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\_collections_abc.py:836(values)
+  1088092    2.137    0.000    2.265    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:379(add_node)
+  1088092    0.855    0.000   23.007    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:25(__init__)
+  1088092    1.732    0.000    1.732    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:176(<dictcomp>)
+  1087752    0.864    0.000   10.072    0.000 {built-in method builtins.hasattr}
+  1087748    8.999    0.000    9.207    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:363(pred)
+  1087747    1.200    0.000   11.272    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:1161(__init__)
+  1087747    0.996    0.000   12.267    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:905(in_edges)
+  1087560    0.180    0.000    0.180    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\preflowpush.py:76(<genexpr>)
+   218970 12405.472    0.057 12405.472    0.057 {method 'index' of 'list' objects}
+     5629    0.005    0.000    0.128    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\encodings\cp1255.py:22(decode)
+     5629    0.123    0.000    0.123    0.000 {built-in method _codecs.charmap_decode}
+     2184 25758.958   11.794 38876.553   17.801 C:\huji\thesis\Code\utils.py:220(biconnected_dfs)
+     2149   10.066    0.005 38900.186   18.102 C:\huji\thesis\Code\utils.py:161(strongly_connected_components)
+     2148    1.074    0.000    1.632    0.001 C:\huji\thesis\Code\utils.py:3(get_nodes_from_edges)
+     1120    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:30(get)
+      743    0.001    0.000    0.003    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:33(move_to_next)
+      542    0.000    0.000    0.001    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\preflowpush.py:122(<genexpr>)
+      404    0.001    0.000    0.004    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\preflowpush.py:86(push)
+      401    0.001    0.000    0.001    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\preflowpush.py:110(activate)
+      378    0.124    0.000    0.305    0.001 {built-in method builtins.max}
+      377    0.010    0.000    0.033    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\abc.py:117(__instancecheck__)
+      377    0.003    0.000    0.040    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\utils\misc.py:291(arbitrary_element)
+      377    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:67(is_reached)
+      377    0.003    0.000    0.013    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\preflowpush.py:130(discharge)
+      377    0.004    0.000    0.023    0.000 {built-in method _abc._abc_instancecheck}
+      211    0.044    0.000    0.044    0.000 {method 'update' of 'set' objects}
+      135    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:64(add_work)
+      135    0.000    0.000    0.002    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\preflowpush.py:118(relabel)
+       42    0.004    0.000    0.006    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\graph.py:398(__iter__)
+        6    0.046    0.008    0.046    0.008 {built-in method builtins.print}
+        5    0.005    0.001    0.005    0.001 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\graph.py:661(nodes)
+        5    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:177(__init__)
+        4    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:342(succ)
+        4    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:703(remove_edge)
+        3    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:181(__len__)
+        3    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:184(__iter__)
+        3    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:1003(__init__)
+        3    0.000    0.000    0.001    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:1035(__call__)
+        3    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:268(__init__)
+        3    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:839(edges)
+        3    0.847    0.282    2.900    0.967 {built-in method builtins.sum}
+      2/1    0.000    0.000    0.019    0.019 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\abc.py:121(__subclasscheck__)
+        2    0.002    0.001    0.002    0.001 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\_collections_abc.py:78(_check_methods)
+        2    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:698(__init__)
+        2    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:725(__iter__)
+        2    1.668    0.834    1.859    0.930 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:428(add_nodes_from)
+        2    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:1115(is_multigraph)
+        2    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:1119(is_directed)
+        2    8.931    4.466   13.033    6.517 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:107(<listcomp>)
+        2    9.064    4.532   49.672   24.836 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:74(build_residual_network)
+        2    5.408    2.704   13.883    6.942 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\preflowpush.py:49(reverse_bfs)
+        2    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\numpy\core\fromnumeric.py:70(<dictcomp>)
+        2    0.001    0.000    0.246    0.123 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\numpy\core\fromnumeric.py:69(_wrapreduction)
+      2/1    0.016    0.008    0.019    0.019 {built-in method _abc._abc_subclasscheck}
+        2    0.000    0.000    0.000    0.000 {built-in method builtins.getattr}
+        2    0.000    0.000    0.246    0.123 {built-in method numpy.core._multiarray_umath.implement_array_function}
+        2    0.246    0.123    0.246    0.123 {method 'reduce' of 'numpy.ufunc' objects}
+        1    6.346    6.346   17.669   17.669 C:\huji\thesis\Code\test_graphs.py:277(load_SNAP)
+        1    2.653    2.653    3.532    3.532 C:\huji\thesis\Code\version1.py:352(remove_flow_cycle)
+        1   22.920   22.920 39085.762 39085.762 <string>:1(<module>)
+        1    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\codecs.py:260(__init__)
+        1    0.000    0.000    0.002    0.002 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\_collections_abc.py:283(__subclasshook__)
+        1    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\_collections_abc.py:362(__subclasshook__)
+        1    3.560    3.560 39062.842 39062.842 C:\huji\thesis\Code\Test.py:220(testSCC)
+        1    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\graph.py:430(__len__)
+        1    0.000    0.000    0.849    0.849 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\graph.py:1768(size)
+        1    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:355(__init__)
+        1    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\reportviews.py:362(__call__)
+        1    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\classes\digraph.py:936(degree)
+        1    0.001    0.001  114.319  114.319 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\maxflow.py:27(maximum_flow)
+        1    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:60(__init__)
+        1    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:70(clear_work)
+        1    0.001    0.001    0.001    0.001 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:155(detect_unboundedness)
+        1    2.190    2.190   12.709   12.709 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\utils.py:172(build_flow_dict)
+        1    9.487    9.487   20.465   20.465 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\preflowpush.py:101(<listcomp>)
+        1    1.456    1.456   10.517   10.517 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\preflowpush.py:184(global_relabel)
+        1    6.617    6.617  101.134  101.134 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\preflowpush.py:18(preflow_push_impl)
+        1    0.474    0.474  101.608  101.608 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\networkx\algorithms\flow\preflowpush.py:287(preflow_push)
+        1    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\numpy\core\fromnumeric.py:2633(_amax_dispatcher)
+        1    0.000    0.000    0.123    0.123 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\numpy\core\fromnumeric.py:2638(amax)
+        1    0.000    0.000    0.000    0.000 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\numpy\core\fromnumeric.py:2758(_amin_dispatcher)
+        1    0.000    0.000    0.124    0.124 C:\Users\Daniel\AppData\Local\Programs\Python\Python310\lib\site-packages\numpy\core\fromnumeric.py:2763(amin)
+        1    0.000    0.000    0.123    0.123 <__array_function__ internals>:2(amax)
+        1    0.000    0.000    0.124    0.124 <__array_function__ internals>:2(amin)
+        1    0.000    0.000    0.000    0.000 {built-in method io.open}
+        1    0.000    0.000    0.000    0.000 {method 'values' of 'dict' objects}
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.callable}
+        1    0.004    0.004 39085.766 39085.766 {built-in method builtins.exec}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+

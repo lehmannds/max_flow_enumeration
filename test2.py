@@ -1,0 +1,4 @@
+import igraph
+
+igraph.Graph()
+
