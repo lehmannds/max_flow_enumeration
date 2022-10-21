@@ -1,7 +1,9 @@
 from cProfile import label
 from cmath import sqrt
 from math import fabs
-from pickle import STOP
+from operator import truediv
+import pickle
+
 from platform import node
 import pstats
 from tabnanny import verbose
@@ -26,27 +28,80 @@ from utils import _bidirectional_shortest_path
 from test_graphs import *
 from test_solvers import test_pypoman
 from datetime import datetime
-from version1 import remove_flow_cycle,print_all_flow, lawler, search_max_flow, print_vertices
+from version1 import remove_flow_cycle,print_all_flow, search_max_flow, print_vertices
+import version1
 import version3
 import version4
 import cProfile
+from lawler1 import lawler as lawler1
+import lawler2
 
 
 _time = None
+write_gpickle = True
+run_lawler = False
+
 def print_time(doing = None):
     global _time
     current = datetime.now()
-    if _time is not None:
+    if _time is not None and doing:
         print(int((current - _time).total_seconds() * 1000), "ms", "doing:", doing)
 
     _time = current
 
-def get_all_max_flows(size = 5, last_graph=False, simple=True, version = 3, run_normal = True):
+def get_simple_graph(size = 9, write_graph=True, get_max_flow=False, name=None, use_existing=False, deg=3, file_name=None):
+    unit_capacity = 20
+    fn = name or (f"{file_name}.g" if file_name else f"graph{size}")
+    fn = f"simple_rand_graphs/{fn}"
+    set_source = False
+    read_from_disk = False
+    if use_existing and os.path.exists(fn):
+        G = nx.readwrite.read_gpickle(fn)
+        read_from_disk = True
+    elif size <= 40 and not file_name:
+        G = nx.readwrite.read_gpickle(fn)
+    else:
+        if name and "multiple_components" in name:
+            G = get_multiple_components_test_graph(number_of_branches=13, show_graph=False)
+        elif file_name:
+            G, source, target = load_SNAP(f"C:/huji/thesis/test_files/{file_name}")
+            set_source = True
+        else:
+            G = get_rand_local_graph(size, unit_capacity= unit_capacity, avg_degree=deg, local=deg* 3)
+    # G = get_full_one_sided_graph(size, unit_capacity, False)
+    # G = get_rand_local_graph(size, unit_capacity= unit_capacity)
+    graph_name = f"get_full_one_sided_graph({size})"
+    # print_entire_graph(G, True)
+    if not set_source:
+        source, target = 0, len(G.nodes) - 1
+    
+    
+    if write_graph and not read_from_disk:
+        nx.readwrite.write_gpickle(G, fn)
+    
+    if get_max_flow:
+        mflow_file_name = fn + "max_flow"
+        if os.path.exists(mflow_file_name):
+            with open(mflow_file_name, "rb") as f:
+                mf = pickle.load(f)
+        else:
+            mf = nx.algorithms.maximum_flow(G, source, target)
+            # flow = copy.deepcopy(mf[1])
+            if os.path.exists(fn):
+                with open(mflow_file_name, "wb") as f:
+                    pickle.dump(mf, f)
+        print(f"flow: {mf[0]}, edge_count:{len(G.edges())}")
+            
+    return G, mf, source, target
+
+def get_all_max_flows(size = 5, last_graph=False, simple=True, version = 3, run_normal = True, file=None):
         
+    results = []
     locality = min(int(size / 5),3)
     unit_capacity = 20
     degree = min(3, int(math.sqrt(size) ))
     print_time()
+    graph_name = ""
     if not simple:
         #G, source, target = load_DIMACS("C:/huji/thesis/test_files/simple_with_2_way_edges.txt", unit_capacity)
         #G, source, target = load_DIMACS("C:/Users/Daniel/Downloads/huck.col.txt", unit_capacity)
@@ -57,12 +112,14 @@ def get_all_max_flows(size = 5, last_graph=False, simple=True, version = 3, run_
         #G = nx.readwrite.read_gpickle("lawler")
         # G, source, target = load_SNAP("C:/huji/thesis/test_files/p2p-Gnutella08.txt")
         # G, source, target = load_SNAP("C:/huji/thesis/test_files/p2p-Gnutella31.txt")
-        G, source, target = load_SNAP("C:/huji/thesis/test_files/Slashdot0811.txt")
+        # G, source, target = load_SNAP("C:/huji/thesis/test_files/Slashdot0811.txt")
         # G, source, target = load_SNAP("C:/huji/thesis/test_files/twitter_combined.txt")
         # G, source, target = load_SNAP("C:/huji/thesis/test_files/roadNet-PA.txt")
+        graph_name = os.path.basename(file)
+        G, source, target = load_SNAP(file)
     else:
         G = get_full_one_sided_graph(size, unit_capacity, False)
-        
+        graph_name = f"get_full_one_sided_graph({size})"
         # print_entire_graph(G, False)
         source, target = 0, len(G.nodes) - 1
     
@@ -78,7 +135,8 @@ def get_all_max_flows(size = 5, last_graph=False, simple=True, version = 3, run_
 
     versions = [1,1,version3,version4]
 
-    # nx.readwrite.write_gpickle(G, "graph")
+    if write_gpickle and len(G.edges) < 1000:
+        nx.readwrite.write_gpickle(G, "graph")
     
     
     mf = nx.algorithms.maximum_flow(G, source, target)
@@ -88,14 +146,15 @@ def get_all_max_flows(size = 5, last_graph=False, simple=True, version = 3, run_
     print_time("deep copy")
     print(f"flow: {mf[0]}, edge_count:{len(G.edges())}")
     
-    run_pypoman = False and not last_graph
-    run_lawler = True
+    run_pypoman = True and not last_graph
+    
     run_version = version > 2
 
     if run_pypoman:
         sys.stdout = open('stdout_pypoman.txt', 'w')
         vertices = test_pypoman(G, mf[0], source, target)
-        print_vertices(G, vertices, True)
+        print_vertices(G, vertices, False)
+        print_time(f"run_pypoman")
     
     
     R = build_residual_network(G, "capacity")
@@ -111,16 +170,17 @@ def get_all_max_flows(size = 5, last_graph=False, simple=True, version = 3, run_
     remove_flow_cycle(flow)    
     print_time(f"remove flow cycle")
     if run_lawler:
-        sys.stdout = open('stdout_lawler.txt', 'w')
+        sys.stdout = open(f'{graph_name}stdout_lawler.txt', 'w')
         print (datetime.now().isoformat(sep=' ', timespec='milliseconds'))
         print_all_flow(flow, 0, 0, 1)
-        _, total_count = lawler(R, flow, set(), unit_capacity)
+        time, total_count, no_flow_count = lawler2.lawler(R, flow, unit_capacity)
+        results.append(['lawler', time, total_count, no_flow_count])
         print (datetime.now().isoformat(sep=' ', timespec='milliseconds'))
-        print (f"** total count: {total_count}")
+        # print (f"** total count: {total_count}")
 
         print_time(f"run lawler")
 
-    do_components = True
+    do_components = False
     connected = False
     if do_components:
         components = strongly_connected_components(R, flow, {n for n in G.nodes}, set())
@@ -128,22 +188,24 @@ def get_all_max_flows(size = 5, last_graph=False, simple=True, version = 3, run_
     else:
         components = [{n for n in G.nodes}]
 
-    print_time(f"SCC computation")
+    
     
     if run_version:
-        sys.stdout = open(f'stdout{version}.txt', 'w')
+        sys.stdout = open(f'{graph_name}stdout{version}.txt', 'w')
         
         print (datetime.now().isoformat(sep=' ', timespec='milliseconds'))
         print_all_flow(flow, 0, 0, 1)
         # print(f"componets:", [len(c) for c in components])
         for c in components:
             print(f"start component len = {len(c)} .")
-            versions[version-1].search_max_flow(R, c, set(), flow, unit_capacity, connected=connected)
+            time, total_count, no_flow_count = versions[version-1].search_max_flow(R, c, set(), flow, unit_capacity, connected=connected)
+            results.append([f'version {version}', time, total_count, no_flow_count])
             
 
 
         print (datetime.now().isoformat(sep=' ', timespec='milliseconds'))
-        
+    print_time(f"version: {version}")    
+    return results
     if not run_normal:
         return
 
@@ -178,8 +240,9 @@ def get_all_max_flows(size = 5, last_graph=False, simple=True, version = 3, run_
     print (datetime.now().isoformat(sep=' ', timespec='milliseconds'))
     return
 
-def compare_files(idx1, idx2,run_all):
-    file_names = [f"stdout{idx1}.txt", f"stdout{idx2}.txt"]
+def compare_files(idx1, idx2,run_all, size):
+    file_names = [f"get_full_one_sided_graph({size})stdout{idx1}.txt", f"get_full_one_sided_graph({size})stdout{idx2}.txt"]
+    
     files = [open(name) for name in file_names]
     flows = [{} for f in files]
     
@@ -230,17 +293,19 @@ def compare_files(idx1, idx2,run_all):
 #     avgs.append(np.average(number_of_flows))
 #     maxs.append(np.max(number_of_flows))
 
-
-def test_run(v3 = False, version=4, simple=False, size=9):
+run_compare = False
+def test_run(v3 = False, version=4, simple=False, size=9, last_graph=False, count=1, file=None):
     not_failed = True
-    idx = 99
+    idx = 0
 
-    while not_failed and idx < 100:
-        get_all_max_flows(last_graph=False, size=size, simple=simple, run_normal=False, version=4)
+    while not_failed and idx < count:
+        results = get_all_max_flows(last_graph=last_graph, size=size, simple=simple, run_normal=False, version=4, file=file)
         sys.stdout = sys.__stdout__
-        not_failed = compare_files(1, 4, True)
+        if run_compare:
+            not_failed = compare_files("_lawler", 4, True, size)
         idx += 1
 
+    return results
 
 def testSCC():
 
@@ -276,24 +341,158 @@ def testSCC():
     print(f"create")
     components = list(strongly_connected_components(R, flow, s, set()))
 
+version1.print_flow_details = False
     
+def stats():
+    v3 = False 
+    dir = "v4"
+    size = 25
+    dat_file = f"./{dir}/output.dat"
+    str = f"True, version=4, simple=True, size={size}, last_graph=False, count=1, file=None"
+    cProfile.run(f"test_run({str})", dat_file)
+    # cProfile.run(f"testSCC()", dat_file)
+    with open(f"./{dir}/time.txt", "w") as f:
+        p = pstats.Stats(dat_file, stream=f)
+        p.sort_stats("time").print_stats()
 
-test_run(True, version=4, simple=True, size=11)
+    with open(f"./{dir}/calls.txt", "w") as f:
+        p = pstats.Stats(dat_file, stream=f)
+        p.sort_stats("calls").print_stats()
 
-# v3 = False 
-# dir = "v3" if v3 else "v1"
-# dat_file = f"./{dir}/output.dat"
-# str = "True" if v3 else ""
-# #cProfile.run(f"test_run({str})", dat_file)
-# cProfile.run(f"testSCC()", dat_file)
-# with open(f"./{dir}/time.txt", "w") as f:
-#     p = pstats.Stats(dat_file, stream=f)
-#     p.sort_stats("time").print_stats()
+    # plt.plot(sizes, avgs, label="average")
+    # plt.plot(sizes, maxs, label="max")
+    # plt.show()
 
-# with open(f"./{dir}/calls.txt", "w") as f:
-#     p = pstats.Stats(dat_file, stream=f)
-#     p.sort_stats("calls").print_stats()
+# stats()
 
-#plt.plot(sizes, avgs, label="average")
-#plt.plot(sizes, maxs, label="max")
-#plt.show()
+files = ["C:/huji/thesis/test_files/p2p-Gnutella31.txt",
+        "C:/huji/thesis/test_files/p2p-Gnutella31.txt",
+        "C:/huji/thesis/test_files/Slashdot0811.txt",
+        "C:/huji/thesis/test_files/twitter_combined.txt",
+        "C:/huji/thesis/test_files/roadNet-PA.txt"]
+
+def parse_output(output):
+    lines = output.split("\n")
+    count = 0
+    start = 0
+    end = 0
+    for idx, line in enumerate(lines):
+        if line.startswith("begin"):
+            start = idx 
+        if line.startswith("end"):
+            end = idx
+
+    if start == 0:
+        count = 0
+    elif end != 0:
+        count = end - start - 2
+    else:
+        count = len(lines) - start - 2
+
+    return count, None
+
+
+
+
+def run_many_tests():
+    all_results = []
+    # sizes = [10, 11, 12, 13, 14, 15, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 2000, 3000, 4000, 5000]
+    # sizes = [7] * 20
+    sizes = [10]
+    size = 0
+    file = ""
+    
+    simple = True
+    for size in sizes:
+    # for file in files:
+        results = test_run(True, version=4, simple=simple, size=size  , last_graph=False, count=1, file=file)
+        for r in results:
+            all_results.append([size, *r])
+
+        print("*" * 100)
+        print(all_results)
+
+
+def test_pypoman_on_many_graphs():
+    import subprocess
+    from multiprocessing import Process
+
+    sys.stdout = open('stdout_pypoman.txt', 'w')
+    # sizes = [5, 8, 11, 14, 17, 20]
+    sizes = [40, 80]
+    for size in sizes:
+        # print_time(f"st, art  pypoman")
+        print(f"start size {size}" + ("*" * 50))
+        print_time()
+        mf = [0,0]
+        while mf[0] == 0:
+            G, mf, source, target = get_simple_graph(size, True, True)
+        
+        timeout = 600
+        lawler2._max_time_ms = timeout * 1000   
+        R = build_residual_network(G, "capacity")
+
+        flow = copy.deepcopy(mf[1])
+
+        for n1 in mf[1]:
+            for n2 in mf[1][n1]:
+                f = mf[1][n1][n2]
+                if n2 in mf[1] and n1 in mf[1][n2]:
+                    f -= mf[1][n2][n1]
+                    flow[n1][n2] = f
+                flow[n2][n1] = -f
+
+        remove_flow_cycle(flow) 
+
+        time, total_count, no_flow_count = lawler2.lawler(R, flow, 20)
+        print (f"lawler total count: {total_count}")
+
+        print_time(f"run lawler")
+        sys.stdout.flush()
+
+
+        # print("start pypoman")
+        # print_time()
+        # p1 = Process(target=test_pypoman, args=(G, mf[0], source, target), name='test_pypoman')
+        # p1.start()
+        # # vertices =
+        # p1.join(timeout=timeout)
+        # p1.kill()
+        # if p1.exitcode == 0:
+        #     print_time(f"run_pypoman finished size: {size}")
+        # else:
+        #     print_time(f"run_pypoman timed out size: {size}")
+        # sys.stdout.flush()
+        
+        
+        print_time()
+        
+        finished = False
+        try:
+            print("start lrs")
+            lrs_out_fn = "lrs_out.txt"
+            result = subprocess.run(["C:/projects/test_python_project/lrs1", "inputs/out.ine"], 
+                        cwd="C:/projects/test_python_project/",
+                        timeout=timeout,
+                        stdout = open(lrs_out_fn, 'w'))
+                        
+            
+            with  open(lrs_out_fn, 'r') as f:
+                output = f.read()
+
+            count, flows = parse_output(output)
+            finished = True
+        except subprocess.TimeoutExpired as e:
+            with  open(lrs_out_fn, 'r') as f:
+                output = f.read()
+            # output = e.output.decode(encoding="utf-8", errors="ignore")
+            count, flows = parse_output(output)
+
+        # print(result)
+        print_time(f"lrs - flow count: {count}, size: {size}, finished: {finished}")
+        print_time(f"lrs: {size}")
+        sys.stdout.flush()
+
+
+if __name__ == '__main__':
+    test_pypoman_on_many_graphs()

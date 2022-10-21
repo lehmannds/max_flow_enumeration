@@ -165,8 +165,8 @@ def strongly_connected_components(G, flow, nodes, constrained_edges):
     """
     preorder = {}
     lowlink = {}
-    print(f"started strongly_connected_components {len(nodes)}")
-    sys.stdout.flush()    
+    # print(f"started strongly_connected_components {len(nodes)}")
+    # sys.stdout.flush()    
     scc_found = set()
     scc_queue = []
     i = 0  # Preorder counter
@@ -175,8 +175,8 @@ def strongly_connected_components(G, flow, nodes, constrained_edges):
             queue = [source]
             
             while queue:
-                if len(preorder) % 50000 == 0 and len(preorder) > 0:
-                    print(f"preorder length {len(preorder)}")
+                # if len(preorder) % 50000 == 0 and len(preorder) > 0:
+                #     print(f"preorder length {len(preorder)}")
                 v = queue[-1]
                 if v not in preorder:
                     i = i + 1
@@ -215,6 +215,7 @@ def strongly_connected_components(G, flow, nodes, constrained_edges):
                                 print(f"biconnected_dfs for {len(scc)} nodes")
                             for c in biconnected_dfs(G, scc, constrained_edges):
                                 yield c
+                            # yield scc
                     else:
                         scc_queue.append(v)
 

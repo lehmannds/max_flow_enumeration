@@ -30,7 +30,8 @@ from datetime import datetime
 #sys.stdout = open('stdout.txt', 'w')
 total_flows = 0
 verbose_print = False
-
+_max_number_for_search = 10000000
+_max_time_ms = 15 * 60 * 1000
 def test_biconnected():
     size = 15
     G, size = get_2_cycles_graph(size)
@@ -166,7 +167,7 @@ def search_break_cycle(R, constrained_edges, nodes, flow_cycle, flow, unit_capac
     for i in np.arange(len(flow_cycle)):
         included_edges = [(flow_cycle[i+1], flow_cycle[i]) for i in np.arange(i)]
         excluded_edges = [(flow_cycle[(i+1)% len(flow_cycle)], flow_cycle[i])]
-        success, new_constraints = set_flow_on_edges(R, nodes, flow, included_edges, excluded_edges, constrained_edges, unit_capacity)
+        success, new_constraints, _ = set_flow_on_edges(R, nodes, flow, included_edges, excluded_edges, constrained_edges, unit_capacity)
         if success:
             search_max_flow(R, nodes, constrained_edges, flow, unit_capacity, level+1, percent, percent_done, True, 0)
         if new_constraints != None:
@@ -184,6 +185,7 @@ def set_constrained_edges(constrained_edges, e, is_add=True):
 
 def set_flow_on_edges(G, nodes, flow, included_edges, excluded_edges, constrained_edges, unit_capacity):
     new_constraints = set()
+    all_cycles = []
     for e in included_edges:
         if flow[e[0]][e[1]] > 0 and e not in constrained_edges:
             new_constraints.add(e)
@@ -198,29 +200,31 @@ def set_flow_on_edges(G, nodes, flow, included_edges, excluded_edges, constraine
     for e in included_edges:
         while flow[e[0]][e[1]] <= 0:
             if e in constrained_edges:
-                return False, new_constraints
+                return False, new_constraints, all_cycles
             cycle = find_augmenting_cycle(G, nodes, constrained_edges, flow, [], e)
             if cycle == None:
-                return False, new_constraints
+                return False, new_constraints, all_cycles
             capacity = get_cycle_capacity(G, cycle, flow) if unit_capacity is None else unit_capacity
             augment_flow(flow, cycle, capacity)
+            all_cycles.append(cycle)
             if e not in constrained_edges:
                 set_constrained_edges(constrained_edges, e)
                 new_constraints.add(e)
     for e in excluded_edges:
         while flow[e[0]][e[1]] > 0:
             if e in constrained_edges:
-                return False, new_constraints
+                return False, new_constraints, all_cycles
             cycle = find_augmenting_cycle(G, nodes, constrained_edges, flow, [], (e[1], e[0]))
             if cycle == None:
-                return False, new_constraints
+                return False, new_constraints, all_cycles
             capacity = get_cycle_capacity(G, cycle, flow) if unit_capacity is None else unit_capacity
             augment_flow(flow, cycle, capacity)
+            all_cycles.append(cycle)
             if e not in constrained_edges:
                 set_constrained_edges(constrained_edges, e)
                 new_constraints.add(e)
 
-    return True, new_constraints
+    return True, new_constraints, all_cycles
 
 def print_edges(all_nodes, components, flow, cycle = None):
     
@@ -247,25 +251,28 @@ def get_capacity(e, flow):
 
 _start = None
 
-def print_all_flow(flow, percent_done, level, count = None):
+print_flow_details = True
+def print_all_flow(flow, percent_done, level, count = None, full_print=False):
     global total_flows
     global _start
     total_flows += 1
-    
+       
     
     if count == None:
          count = total_flows
     else:
         total_flows = count
 
-    if total_flows == 1:
+    if total_flows <= 2 or _start == None:
         _start = time.time_ns() // 1000000
 
     time_passed = time.time_ns() // 1000000 - _start
 
     print(f"************** flow# {count} time per flow: {time_passed/count}***************")
     sys.stdout.flush()
-    return
+
+    if not print_flow_details and not full_print:
+        return
     #print(f"percent done {percent_done} level: {level}")
     for u in flow:
         for v in flow[u]:
@@ -349,8 +356,14 @@ def print_graph(G, nodes, ignore_edges, flow):
     
 
 
-def remove_flow_cycle(flow, check_constraints = False, constrained_edges = None, detect_only=False, augmented_cycles=[]):
+def remove_flow_cycle(flow, check_constraints = False, constrained_edges = None, detect_only=False, augmented_cycles=[], add_edges=None):
     
+    if add_edges:
+        flow = copy.deepcopy(flow)
+        for e in add_edges:
+            if e[0] not in flow:
+                flow[e[0]] = {}
+            flow[e[0]][e[1]] = 20 
     visited = set()
     in_stack = set()
     stack = []
@@ -376,8 +389,8 @@ def remove_flow_cycle(flow, check_constraints = False, constrained_edges = None,
 
 
                         if to in in_stack:
-                            if detect_only:
-                                return True
+                            # if detect_only:
+                            #     return True
                             #handle cycle
                             prev = current
                             next = to
@@ -396,9 +409,9 @@ def remove_flow_cycle(flow, check_constraints = False, constrained_edges = None,
                             cycle_is_constrained = False
 
                             while True:
-                                if check_constraints:
+                                if check_constraints or detect_only:
                                     cycle.append(prev)
-                                    if (prev,next) in constrained_edges:
+                                    if not detect_only and not cycle_is_constrained and (prev,next) in constrained_edges:
                                         cycle_is_constrained = True
                                 else:
                                     flow[prev][next] -= f
@@ -409,8 +422,8 @@ def remove_flow_cycle(flow, check_constraints = False, constrained_edges = None,
                                     found_cycle = True
                                     while queue[-1] != current:
                                         queue.pop()
-                                    if check_constraints:
-                                        if cycle_is_constrained:
+                                    if check_constraints or detect_only:
+                                        if cycle_is_constrained or detect_only:
                                             return cycle
                                         else:
                                             augment_flow(flow, cycle, f)
@@ -478,41 +491,5 @@ def print_vertices(G, vertices, filter):
 
         idx2 += 1
 
-def get_flow_edges(flow):
-    edges = []
-    for u in flow:
-        for j in flow[u]:
-            if flow[u][j] > 0:
-                edges.append((u, j))
 
-    return edges
 total_count = 0
-def lawler(R, flow, constrained_edges, unit_capacity, count = 1):
-    
-    level_count = 0
-    total_count = 0
-    edges = get_flow_edges(flow)
-    
-    for i in np.arange(len(edges)):
-        flow2 = copy.deepcopy(flow)
-        included_edges = [edges[j] for j in np.arange(i)]
-        excluded_edges = [edges[i]]
-        
-        success, new_constraints = set_flow_on_edges(R, None, flow2, included_edges, excluded_edges, constrained_edges, unit_capacity)
-        if success:
-            total_count += 1
-            if not remove_flow_cycle(flow2, detect_only=True):
-                level_count += 1
-                print_all_flow(flow2, 0, 0, count + level_count)
-            else:
-                print("flow cycle exists")
-                sys.stdout.flush()
-                
-            level_count1, total_count1 = lawler(R, flow2, constrained_edges, unit_capacity, count + level_count)
-            level_count += level_count1
-            total_count += total_count1
-        if new_constraints != None:
-            for c in new_constraints:
-                set_constrained_edges(constrained_edges, c, False)
-
-    return level_count, total_count

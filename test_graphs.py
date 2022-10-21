@@ -1,3 +1,4 @@
+from queue import Queue
 import networkx as nx
 import numpy as np
 import random as r
@@ -19,11 +20,11 @@ def get_simple_test_graph():
                         
     return G
 
-def get_multiple_components_test_graph(show_graph=False):
+def get_multiple_components_test_graph(show_graph=False, number_of_branches = 10):
     G = nx.DiGraph()
     capacity = 20
     branch_size = 2
-    number_of_branches = 10
+    
     total_size = number_of_branches + 3 + number_of_branches * branch_size
     G.add_nodes_from(np.arange(total_size))
     G.add_edges_from([  (0, 1, {"capacity": capacity}),
@@ -170,7 +171,8 @@ def get_rand_local_graph(size, avg_degree = 3, local=10, unit_capacity= None, sh
             if unit_capacity == None:
                 c = r.randint(1, 10)
         
-            G.add_edge(i, to, capacity = c)
+            if not G.has_edge(to, i):
+                G.add_edge(i, to, capacity = c)
 
     return G
 
@@ -281,6 +283,7 @@ def load_SNAP(file_name, unit_capacity = 20):
     edges = set()
     source = 0e10
     target = 0
+    adj_list = {}
 
     for line in f:
         parts = line.split()
@@ -297,27 +300,44 @@ def load_SNAP(file_name, unit_capacity = 20):
             if capacity > 0:
                 if from_node not in nodes:
                     nodes.add(from_node) 
+                    adj_list[from_node] = set()
                     
                 if to_node not in nodes:
-                    nodes.add(to_node) 
+                    nodes.add(to_node)
+                    adj_list[to_node] = set()
 
-                if (to_node, from_node) not in edges:
-                    edges.add((from_node, to_node))
+                adj_list[from_node].add(to_node)
+                    
 
     if source == 0:
         source = np.min([n for n in nodes])
     if target == 0:
         target = np.max([n for n in nodes])
 
-    bad_edges = []
-    for e in edges:
-        if e[1] == source:
-            bad_edges.append(e)
-        if e[0] == target:
-            bad_edges.append(e)
+    visited = set()
+    visited.add(source)
+    bfs_queue = Queue()
+    bfs_queue.put(source)
+    while not bfs_queue.empty():
+        from_node = bfs_queue.get()
+        for to_node in adj_list[from_node]:
+            if not to_node in visited:
+                visited.add(to_node)
+                if to_node != target:
+                    bfs_queue.put(to_node)
+            if to_node != source and (to_node, from_node) not in edges:
+                edges.add((from_node, to_node))
 
-    for e in bad_edges:
-        edges.remove((e[0], e[1]))
+
+    # bad_edges = []
+    # for e in edges:
+    #     if e[1] == source:
+    #         bad_edges.append(e)
+    #     if e[0] == target:
+    #         bad_edges.append(e)
+
+    # for e in bad_edges:
+    #     edges.remove((e[0], e[1]))
 
     G.add_nodes_from(nodes)
     G.add_edges_from([(e[0], e[1], {"capacity": capacity}) for e in edges])

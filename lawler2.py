@@ -4,13 +4,19 @@ import sys
 import copy
 import time
 
-def get_flow_edges(flow):
+def get_flow_edges(flow, cycle_to_break):
     edges = []
 
-    for u in flow:
-        for j in flow[u]:
-            if flow[u][j] > 0:
-                edges.append((u, j))
+    if cycle_to_break:
+        c = len(cycle_to_break)
+        for i in range(c):
+            edges.append((cycle_to_break[(i + 1) % c], cycle_to_break[i]))
+
+    else:
+        for u in flow:
+            for j in flow[u]:
+                if flow[u][j] > 0:
+                    edges.append((u, j))
 
     return edges
 
@@ -39,7 +45,7 @@ def lawler(R, flow, unit_capacity, **kwargs):
         for cycle in current["flow_cycles"]:
             augment_flow(flow, cycle, unit_capacity)
 
-        edges = get_flow_edges(flow)
+        edges = get_flow_edges(flow, current["cycle_to_break"])
         
         for i in reversed(range(len(edges))): # np.arange(len(edges)):
             
@@ -82,6 +88,4 @@ def lawler(R, flow, unit_capacity, **kwargs):
                 augment_flow(flow, cycle, -unit_capacity)
 
     print(f"number_of_flow_cycles {total_count - level_count}")
-    print(f"no cycles {level_count}")
-
     return time.time_ns() // 1000000 - _start, total_count, level_count

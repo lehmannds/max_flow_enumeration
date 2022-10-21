@@ -89,19 +89,37 @@ def pulptest():
     plt.legend()
     plt.show()    
 
-def test_pypoman(G, max, source, target):
+
+_time = None
+from datetime import datetime
+
+def print_time(doing = None):
+    global _time
+    current = datetime.now()
+    if _time is not None and doing:
+        print(int((current - _time).total_seconds() * 1000), "ms", "doing:", doing)
+
+    _time = current
+
+def test_pypoman(G, max, source, target, only_create_matrix=False):
+    sys.stdout = open('stdout_pypoman.txt', 'w')
+    
     #ineq_lhs, ineq_rhs = Get_Test_A_B()
     start = time.localtime()
     print (time.strftime("%H:%M:%S", start))
     ineq_lhs, ineq_rhs = Get_A_b(G, max, source, target)
-    vertices = pypoman.compute_polytope_vertices(ineq_lhs, ineq_rhs)
-    # for v in vertices:
-    #     print({"v": v})
 
-    # print(list(G.edges))
-    print (time.strftime("%H:%M:%S", time.localtime()))
-    
-    return vertices
+    if not only_create_matrix:
+        print_time()
+        vertices = pypoman.compute_polytope_vertices(ineq_lhs, ineq_rhs)
+        print_time("pypoman")
+        # for v in vertices:
+        #     print({"v": v})
+
+        print(f"pypoman found size: {len(G.nodes)} solutions#: {len( vertices)}")
+        # print (time.strftime("%H:%M:%S", time.localtime()))
+        sys.stdout.flush()
+        return vertices
 
 
 def test_solvers():
@@ -250,8 +268,26 @@ def Get_A_b(G, max, source, target):
 
         idx+=2
 
+    write_matrix_to_file(ineq_lhs, ineq_rhs)
+
     return ineq_lhs, ineq_rhs
 
 
-
+def write_matrix_to_file(ineq_lhs, ineq_rhs):
     
+    ineq_lhs = np.array(ineq_lhs)
+    fn = "C:/projects/test_python_project/inputs/out.ine"
+    with open(fn, "w") as f:
+        f.write(f"""daniel test
+H-representation
+begin
+{len(ineq_lhs)} {len(ineq_lhs[0]) + 1} rational
+""")
+
+        for i in range(len(ineq_rhs)):
+            line = [ineq_rhs[i]] + (- ineq_lhs[i]).tolist()
+            line = [str(int(x)) for x in line]
+            f.write(" " + "  ".join(line) + " \n")
+        f.write("end\n")
+
+
