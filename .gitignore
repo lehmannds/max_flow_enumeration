@@ -1,0 +1,10 @@
+get_full_one_sided_graph*
+__pycache__/**
+__pycache__/*
+simple_rand_graphs/**
+**/*.txt
+**/*.pyc
+*.txt
+__pycache__/*.pyc
+out.ine
+v4/output.dat
