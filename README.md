@@ -1,4 +1,4 @@
-# thesis
+# Max flow enumeration (thesis)
 
 This project has multiple algorithms for the enumeration of max flow solutions. 
 
