@@ -20,9 +20,10 @@ def get_flow_edges(flow, cycle_to_break):
 
     return edges
 
-def lawler(R, flow, unit_capacity, **kwargs):
+def lawler(R, flow, unit_capacity, timeout=20, check_flow_cycle=True, **kwargs):
     _start = time.time_ns() // 1000000
-
+    _max_time_ms = timeout * 1000
+    
     total_count = 1
     level_count = 1
     constrained_edges = set()
@@ -60,7 +61,7 @@ def lawler(R, flow, unit_capacity, **kwargs):
                     print(f"total_count {total_count} time per flow: {time_passed/total_count}")
                     sys.stdout.flush()
                 
-                flow_cycle = remove_flow_cycle(flow, detect_only=True)
+                flow_cycle = check_flow_cycle and remove_flow_cycle(flow, detect_only=True)
                 if not flow_cycle:
                     level_count += 1
                     # print_all_flow(flow, 0, 0, level_count)

@@ -92,33 +92,39 @@ class Test(unittest.TestCase):
             #     "func": lawler,
             #     "pass_residual": False
             # },
-            {
-                "file_name": 'lawler2.txt',
-                "func": lawler2,
-                "pass_residual": True
+            # {
+            #     "file_name": 'lawler1.txt',
+            #     "func": lawler1,
+            #     "pass_residual": True
 
-            },
-            {
-                "file_name": 'lawler1.txt',
-                "func": lawler1,
-                "pass_residual": True
+            # },
+            # {
+            #     "file_name": 'lawler2.txt',
+            #     "func": lawler2,
+            #     "pass_residual": True
 
-            },
+            # },
             {
                 "file_name": 'version4.txt',
                 "func": search_max_flow,
                 "pass_residual": True
-            }
+            }   
         ]
 
-        
+        timeout = 60
+                        
         print_time()
-        sizes = [40]
-        first = True
+        files = ["p2p-Gnutella08.txt", "p2p-Gnutella31.txt"]
+        # files = ["roadNet-PA.txt", "roadNet-TX.txt", "roadNet-CA.txt"]
+        # files = ["roadNet-CA.txt"]
         
-        for size in sizes:
+        
+        for file in files:
             sys.stdout = total_results
-            r = [size]
+            first = True
+            print(f'starting file {file}' + "*" * 50)
+            sys.stdout.flush()
+            r = [file]
             for f in funcs:
                 sys.stdout = total_results
                 print(f'starting {f["file_name"]}')
@@ -128,41 +134,45 @@ class Test(unittest.TestCase):
                     
                     sys.stdout.flush()
                     # roadNet-PA.txt   p2p-Gnutella08.txt
-                    # G, mf, source, target = get_simple_graph(size, True, True, None, True, deg=10, file_name="roadNet-PA.txt") # not first, deg=10)
+                    G, mf, source, target = get_simple_graph(None, True, True, None, True, deg=10, file_name=file) # not first, deg=10)
                     # G, mf, source, target = get_simple_graph(size, False, True, f"multiple_components{size}", True, deg=10) # not first, deg=10)
                     # G, mf, source, target = get_simple_graph(size, False, True, f"simple_graph{size}", True, deg=10) # not first, deg=10)
-                    G, mf, source, target = get_simple_graph(size, False, True, f"graph{size}", True, deg=10) # not first, deg=10)
+                    # G, mf, source, target = get_simple_graph(size, False, True, f"graph{size}", True, deg=10) # not first, deg=10)
 
                 
                 if first:
+                    r.append(len(G.nodes))
                     r.append(len(G.edges))
                 first = False         
                 sys.stdout.flush()     
                 sys.stdout = open(f["file_name"], 'w')
                 # print_time(f"st, art  pypoman")
-                print(f"start size {size}" + ("*" * 50))
+                # print(f"start size {size}" + ("*" * 50))
+                print(f"start file {file}" + ("*" * 50))
                     
                 # print_all_flow(mf[1], 0, 0, count=1, full_print=True)
-                timeout = 600
                 print_time()
 
                 lawler_imp = f["func"]
                 R = None
-                flow = None
+                
                 if f["pass_residual"]:
                     R = build_residual_network(G, "capacity")
-                    flow = Test.copy_flow(mf)
-                    remove_flow_cycle(flow, False)
+                    
+                flow = Test.copy_flow(mf)
+                remove_flow_cycle(flow, False)
+
                 count = target + 1
                 start_nodes = set()
                 for i in G.nodes:
                     start_nodes.add(i)
                 time, total_count, no_flow_count = lawler_imp(R or G, flow = flow or mf[1], 
                         source = source, target = target, flow_value = mf[0], unit_capacity = 20, 
-                        check_flow_cycle=True, start_nodes=start_nodes, constrained_edges=set(),
-                        always_do_components = False)
+                        check_flow_cycle=False, start_nodes=start_nodes, constrained_edges=set(),
+                        always_do_components = False, timeout=timeout)
                 r.append(time)
                 r.append(total_count)
+                r.append(no_flow_count)
                 print (f"lawler total count: {total_count}")
                 print (f"no_flow_count: {no_flow_count}")
                 
@@ -191,4 +201,25 @@ class Test(unittest.TestCase):
             not_failed = Test.compare_files("lawler_trival.txt", "stdout_pypoman.txt")
             idx += 1
             sys.stdout.flush()
+        
+    def test_version_4_counts(self):
+        
+        size = 10
+        G, mf, source, target = get_simple_graph(size, False, True, f"multiple_components{size}", True, deg=10) # not first, deg=10)
+        timeout = 60000
+        
+        
+        R = build_residual_network(G, "capacity")
+            
+        flow = Test.copy_flow(mf)
+        remove_flow_cycle(flow, False)
+
+        count = target + 1
+        start_nodes = set()
+        for i in G.nodes:
+            start_nodes.add(i)
+        time, total_count, no_flow_count = search_max_flow(R or G, flow = flow or mf[1], 
+                source = source, target = target, flow_value = mf[0], unit_capacity = 20, 
+                check_flow_cycle=False, start_nodes=start_nodes, constrained_edges=set(),
+                always_do_components = False, timeout=timeout)
         

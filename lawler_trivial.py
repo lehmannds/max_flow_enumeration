@@ -1,5 +1,5 @@
 import numpy as np
-from version1 import augment_flow, set_flow_on_edges, remove_flow_cycle, print_all_flow, set_constrained_edges, _max_number_for_search, _max_time_ms
+from version1 import augment_flow, set_flow_on_edges, remove_flow_cycle, print_all_flow, set_constrained_edges, _max_number_for_search
 import sys
 import copy
 import time
@@ -8,7 +8,7 @@ import networkx as nx
 
 print_flow_details = False
 total_flows = 0
-_start = time.time_ns()
+
 
 def print_all_flow(flow, constrained_edges, count = None):
     global total_flows
@@ -45,19 +45,23 @@ def print_all_flow(flow, constrained_edges, count = None):
 
 
 
-def get_flow_edges(flow):
+def get_flow_edges(flow, cycle_to_break):
     edges = []
 
-    for u in flow:
-        if u != new_source:
+    if cycle_to_break:
+        c = len(cycle_to_break)
+        for i in range(c):
+            edges.append((cycle_to_break[(i + 1) % c], cycle_to_break[i]))
+
+    else:
+        for u in flow:
             for j in flow[u]:
-                if j != new_target and flow[u][j] > 0:
+                if flow[u][j] > 0:
                     edges.append((u, j))
 
     return edges
 
 def set_constraints_on_graph(G, edge, is_include):
-    
     G.remove_edge(edge[0], edge[1])
     if is_include:
         for new_edge in [(new_source, edge[1]), (edge[0], new_target)]:
@@ -72,19 +76,20 @@ def remove_constraints_from_graph(G, edge, is_include):
     
     G.add_edge(*edge, capacity=20)
     if is_include:
-        G.edges[new_source, edge[1]]["capacity"] -= 20
-        G.edges[edge[0], new_target]["capacity"] -= 20
-        
-    
+        for new_edge in [(new_source, edge[1]), (edge[0], new_target)]:
+            if new_edge in G.edges:
+                G.edges[new_edge]["capacity"] -= 20
+                
 
 
 new_source = -1
 new_target = -2
 
 
-def lawler(G, flow, source, target, flow_value, check_flow_cycle=False, **kwargs):
+def lawler(G, flow, source, target, flow_value, check_flow_cycle=False, timeout=20, **kwargs):
     total_flows = 0
     # print_all_flow(flow, [])
+    _max_time_ms = timeout * 1000
     
     _start = time.time_ns() // 1000000
     constrained_edges = {}
@@ -99,7 +104,7 @@ def lawler(G, flow, source, target, flow_value, check_flow_cycle=False, **kwargs
     total_count = 1
     level_count = 1
     # constrained_edges = set()
-    stack = [{"added_constraints": [], "done": False, "flow":flow}]
+    stack = [{"added_constraints": [], "done": False, "flow":flow, "cycle_to_break": None}]
     while stack:
         current = stack[-1]
 
@@ -122,7 +127,7 @@ def lawler(G, flow, source, target, flow_value, check_flow_cycle=False, **kwargs
                 if current["added_constraints"][c]:
                     required_flow += 20
         
-        edges = get_flow_edges(current["flow"])
+        edges = get_flow_edges(current["flow"], current["cycle_to_break"])
         
         for i in reversed(range(len(edges))): # np.arange(len(edges)):
             new_constraints = {}
@@ -176,9 +181,16 @@ def lawler(G, flow, source, target, flow_value, check_flow_cycle=False, **kwargs
                     {
                         "added_constraints": new_constraints,
                         "done": False,
+                        "cycle_to_break": flow_cycle,
                         "flow": mf[1]
                     })
+
+            ms_passed = time.time_ns()  // 1000000 - _start 
+            if ms_passed > _max_time_ms:
+                print(f"total number of flows: {total_count}, no cycles: {level_count}")
+                return ms_passed, total_count, level_count
                 
+
             if new_constraints != None:
                 for c in new_constraints:
                     remove_constraints_from_graph(G, c, constrained_edges[c])

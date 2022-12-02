@@ -326,7 +326,7 @@ def find_augmenting_cycle(R, nodes, constranied_edges, flow, bad_edges, edge = N
     return path[1]
 
 def find_residual_edge(flow, nodes, constrained_edges, bad_edges, flow_cycle=None):
-    if flow_cycle == None:
+    if not flow_cycle:
         for u in nodes:
             for v in flow[u]:
                 if v in nodes and (u,v) not in constrained_edges and flow[u][v]  < 0 and (u,v) not in bad_edges:

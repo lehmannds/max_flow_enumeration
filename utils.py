@@ -163,6 +163,7 @@ def strongly_connected_components(G, flow, nodes, constrained_edges):
     """Generate nodes in strongly connected components of graph.
         copied from the regular implementation to make changes to use capacity
     """
+    
     preorder = {}
     lowlink = {}
     # print(f"started strongly_connected_components {len(nodes)}")

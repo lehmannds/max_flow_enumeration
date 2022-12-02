@@ -58,8 +58,8 @@ def get_simple_graph(size = 9, write_graph=True, get_max_flow=False, name=None, 
     if use_existing and os.path.exists(fn):
         G = nx.readwrite.read_gpickle(fn)
         read_from_disk = True
-    elif size <= 40 and not file_name:
-        G = nx.readwrite.read_gpickle(fn)
+    # elif size <= 40 and not file_name:
+    #     G = nx.readwrite.read_gpickle(fn)
     else:
         if name and "multiple_components" in name:
             G = get_multiple_components_test_graph(number_of_branches=13, show_graph=False)

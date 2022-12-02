@@ -1,3 +1,5 @@
+from itertools import count
+import uuid
 from platform import node
 import queue
 from utils import strongly_connected_components
@@ -5,13 +7,28 @@ from version1 import print_all_flow, find_augmenting_cycle, get_cycle_capacity, 
 import copy
 import time
 
+_time = None
+from datetime import datetime
+import sys
+
+def print_time(doing = None):
+    global _time
+    current = datetime.now()
+    if _time is not None and doing:
+        print(int((current - _time).total_seconds() * 1000), "ms", "doing:", doing)
+
+    _time = current
 
 
-def search_max_flow(R, start_nodes, constrained_edges, flow, unit_capacity, always_do_components = False, connected=False, **kwargs):
+
+def search_max_flow(R, start_nodes, constrained_edges, flow, unit_capacity, always_do_components = False, connected=False, timeout=20, check_flow_cycle=True, **kwargs):
     _start = time.time_ns() // 1000000
+    _max_time_ms = timeout * 1000
+    counts = [["Total", 0]]
+
     total_count = 1
     stack = [{"connected": connected, "flow_cycles": [], "added_constraints": [], 
-                "nodes": None, "done": False, "flow_cycle": None, "do_components": always_do_components}]
+                "nodes": None, "done": False, "flow_cycle": None, "do_components": True}]
     number_of_flow_cycles = 0    
     max_tries = 3
     current_nodes = start_nodes or R.nodes
@@ -26,6 +43,20 @@ def search_max_flow(R, start_nodes, constrained_edges, flow, unit_capacity, alwa
             for cycle1 in current["flow_cycles"]:
                 augment_flow(flow, cycle1, -unit_capacity)
             stack.pop()
+            guid = current.get("guid", None)
+            add_to_count = current.get("count", False)
+            if not guid:
+                if add_to_count:
+                    counts[-1][1] += 1
+            else:
+                idx_component = current.get("idx_component")
+                counts[-idx_component - 1][1] *=  counts[-1][1]
+                counts.pop()
+                
+                is_first = idx_component == 1
+                if is_first:
+                    counts[-2][1] += counts[-1][1]
+                    counts.pop()
             continue
         found = False
         bad_edges = []
@@ -39,6 +70,7 @@ def search_max_flow(R, start_nodes, constrained_edges, flow, unit_capacity, alwa
             if cycle == None:
                 if current["connected"]:
                     current["done"] = True
+                    current["count"] = True
                     continue
                 else:
                     do_components = True
@@ -55,8 +87,16 @@ def search_max_flow(R, start_nodes, constrained_edges, flow, unit_capacity, alwa
         
         components = [current_nodes]
         if do_components:
-            components = strongly_connected_components(R, flow, current_nodes, constrained_edges)
             
+            components = strongly_connected_components(R, flow, current_nodes, constrained_edges)
+            components = list(components)
+            
+            sys.stdout.flush()
+
+            if len(components) == 0:
+                current["count"] = True
+            # if len(components) > 1:
+            #     print(f"components: {[len(c) for c in components]}")
 
         
         idx = 0
@@ -64,17 +104,28 @@ def search_max_flow(R, start_nodes, constrained_edges, flow, unit_capacity, alwa
             current["done"] = True
             current["nodes"] = current_nodes
             components_count = 0
+            parent_guid = str(uuid.uuid4())
+            if len(components) > 0:
+                counts.append([parent_guid, 1])
+            idx_component = 1
             for c in components:
+                guid = str(uuid.uuid4())
+                counts.append([guid, 1])
                 components_count += 1
                 el = {  "flow_cycles": [], 
                         "added_constraints": [], 
                         "nodes": c,
+                        "idx_component": idx_component,
                         "done": False,
+                        "parent_guid": parent_guid,
+                        "guid": guid,
                         "flow_cycle": current["flow_cycle"],
                         "connected": do_components,
                         "do_components": always_do_components and not do_components
                     }
+                idx_component += 1
                 stack.append(el)
+            
 
             if components_count > 1:
                 pass
@@ -99,17 +150,21 @@ def search_max_flow(R, start_nodes, constrained_edges, flow, unit_capacity, alwa
 
         # region flow 2 branch
 
-        capacity = get_cycle_capacity(R, cycle, flow) if unit_capacity is None else unit_capacity
+        capacity = unit_capacity or get_cycle_capacity(R, cycle, flow)
         
         augment_flow(flow, cycle, capacity)
         cycles = [cycle]
-        flow_cycle = remove_flow_cycle(flow, True, constrained_edges, augmented_cycles=cycles)
-        # flow_cycle = None
+        if check_flow_cycle:
+            flow_cycle = remove_flow_cycle(flow, True, constrained_edges, augmented_cycles=cycles, detect_only=True)
+        else:
+            flow_cycle = None
 
         total_count += 1
-        if flow_cycle == None:
-            if total_count % 1000 == 0:
-                print_all_flow(flow, 0, 0, total_count)
+        if total_count % 2000 == 0:
+            print_all_flow(flow, 0, 0, total_count)
+            sys.stdout.flush()
+        if not flow_cycle:
+            pass
                 # print("flow count:", total_count)
         else:
             number_of_flow_cycles += 1
@@ -117,8 +172,10 @@ def search_max_flow(R, start_nodes, constrained_edges, flow, unit_capacity, alwa
 
         ms_passed = time.time_ns() // 1000000 - _start 
         if total_count - number_of_flow_cycles >= _max_number_for_search  or ms_passed > _max_time_ms:
-            print(f"{total_count} flows, number_of_flow_cycles={number_of_flow_cycles}")
-            return ms_passed, total_count, total_count - number_of_flow_cycles
+            total_with_join = get_total_count(counts)
+            print(counts)
+            print(f"{total_count} flows, number_of_flow_cycles={number_of_flow_cycles} total_with_join: {total_with_join}")
+            return ms_passed, total_with_join,   - number_of_flow_cycles
 
 
         #components2 = list(strongly_connected_components(R, flow, current_nodes, constrained_edges))
@@ -143,7 +200,11 @@ def search_max_flow(R, start_nodes, constrained_edges, flow, unit_capacity, alwa
         if len(components2) == 0:
             for cycle1 in cycles:
                 augment_flow(flow, cycle1, -unit_capacity)
-        
+
+    print(counts) 
     print(f"number_of_flow_cycles {number_of_flow_cycles}")
-    return time.time_ns() // 1000000 - _start, total_count, total_count - number_of_flow_cycles
+    
+    return time.time_ns() // 1000000 - _start, get_total_count(counts), total_count - number_of_flow_cycles
         
+def get_total_count(counts):
+    return sum([c[1] for c in counts])
